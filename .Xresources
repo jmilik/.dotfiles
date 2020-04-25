@@ -1,0 +1,50 @@
+! github.com/Relaxed_Theme
+*.foreground:  #d9d9d9
+*.background:  #353a44
+*.cursorColor: #d9d9d9
+!
+! Black
+*.color0:      #151515
+*.color8:      #636363
+!
+! Red
+*.color1:      #bc5653
+*.color9:      #bc5653
+!
+! Green
+*.color2:      #909d63
+*.color10:     #a0ac77
+!
+! Yellow
+*.color3:      #ebc17a
+*.color11:     #ebc17a
+!
+! Blue:
+*.color4:      #6a8799
+*.color12:     #7eaac7
+!
+! Magenta
+*.color5:      #b06698
+*.color13:     #b06698
+!
+! Cyan
+*.color6:      #c9dfff
+*.color14:     #acbbd0
+!
+! White
+*.color7:      #d9d9d9
+*.color15:     #f7f7f7
+
+Xft.dpi:109
+URxvt*termName:rxvt-256color
+URxvt.letterSpace: 0
+URxvt.lineSpace: 0
+URxvt.internalBorder: 10
+URxvt.saveline: 65535
+URxvt.scrollBar: false
+URxvt.scrollBar_right: false
+URxvt.depth: 24
+URxvt.font : xft:SourceCodePro-Regular:size=10
+URxvt.boldFont: xft:SourceCodePro-Bold:size=10
+URxvt.italicFont: xft:SourceCodePro-It:size=10
+URxvt.boldItalicFont: xft:SourceCodePro-BoldIt:size=10
