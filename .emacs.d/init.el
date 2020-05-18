@@ -1,14 +1,16 @@
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
-  version-control t
-  delete-old-versions t
-  kept-new-versions 20
-  kept-old-versions 5
-  backup-by-copying t)
+      version-control t
+      delete-old-versions t
+      kept-new-versions 20
+      kept-old-versions 5
+      backup-by-copying t)
 
 (setq custom-file null-device
       gc-cons-threshold 20000000)
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+(setq default-major-mode 'prog-mode)
 
 (setq-default truncate-lines t
 	      indent-tabs-mode nil)
@@ -17,7 +19,6 @@
 (show-paren-mode t)
 
 (global-hl-line-mode t)
-
 (add-hook 'prog-mode-hook 'linum-mode)
 
 (setq sentence-end-double-space t)
@@ -34,10 +35,13 @@
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
-(setq scroll-margin 25
-      scroll-step 1
+(setq scroll-step 1
       scroll-conservatively 10000
-      scroll-preserve-screen-position t)
+      scroll-preserve-screen-position 'always
+      next-screen-context-lines 5)
+
+(setq mouse-wheel-scroll-amount '(0.05)
+      mouse-wheel-progressive-speed nil)
 
 (set-face-attribute 'default nil
                     :family "Adobe Source Code Pro"
@@ -49,8 +53,8 @@
       shell-command-switch "-c")
 
 (require 'package)
-(setq package-enable-at-startup nil)
-(setq package-archives '(("org"   . "http://orgmode.org/elpa/")
+(setq package-enable-at-startup nil
+      package-archives '(("org"   . "http://orgmode.org/elpa/")
                          ("gnu"   . "http://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 (package-initialize)
@@ -144,17 +148,22 @@
 
 (use-package hydra)
 
-;; TODO - this but better
-(use-package ivy-hydra
-  :after (ivy hydra))
-
 (use-package dumb-jump
   :after ivy
   :config
   (setq dumb-jump-selector 'ivy
         dumb-jump-prefer-searcher 'rg))
 
-;; TODO projectile
+(use-package projectile
+  :config
+  (projectile-mode t))
+
+(use-package counsel-projectile
+  :after (counsel projectile)
+  :config
+  (counsel-projectile-mode))
+
+(use-package ripgrep)
 
 (use-package evil-exchange
   :after evil
@@ -189,15 +198,28 @@
   :config
   (winum-mode))
 
-(use-package general)
+(use-package key-chord
+  :config
+  (key-chord-mode t))
+
+(use-package general
+  :after key-chord)
+
+(use-package tol-scroll
+  :load-path "~/.emacs.d/jtm/tol-scroll"
+  :diminish
+  :config
+  (tol-scroll-mode))
 
 ;; TODO isearch iedit bindings
 
 (general-define-key
- "<escape>" 'evil-escape)
+ "<escape>" 'evil-escape
+ "<prior>"  'evil-scroll-page-up
+ "<next>"   'evil-scroll-page-down)
 
 (general-define-key
- :states '(normal visual emacs)
+ :states '(normal visual motion emacs)
  :keymaps 'override
  :prefix "SPC"
  ;; Misc
@@ -207,15 +229,27 @@
  "!"   'shell-command
  "ot"  'shell
  "r"   'ivy-resume
- ;; Searching in buffers
- "ss"  'swiper
- ;; Files
- "ff"  'counsel-find-file
- "fj"  'dired-jump
  ;; Buffers
  "bb"  'ivy-switch-buffer
  "bd"  'kill-this-buffer
- "bs"  'evil-write
+ ;; Files
+ "ff"  'counsel-find-file
+ "fj"  'dired-jump
+ "fp"  'counsel-projectile-find-file
+ "fs"  'evil-write
+ ;; Jump ;; TODO - work out if this is good
+ "ga"  'projectile-find-other-file
+ "gb"  'dumb-jump-back
+ "gf"  'dumb-jump-go-prompt
+ "gg"  'dumb-jump-go
+ "gG"  'dumb-jump-go-other-window
+ "gp"  'dumb-jump-quick-look
+ ;; Project
+ "pd"  'projectile-kill-buffers
+ "ps"  'projectile-switch-open-project
+ ;; Searching in buffers
+ "ss"  'swiper
+ "sp"  'projectile-ripgrep
  ;; Window
  "w="  'winum-select-window-by-number
  "w/"  'split-window-right
@@ -235,23 +269,50 @@
  "0"   '(winum-select-window-0-or-1 :wk t))
 
 (general-define-key
- :states '(normal visual emacs)
+ :states '(normal visual motion emacs)
  :keymaps 'override
- "Q"   'kill-buffer-and-window)
+ "Q"   'save-buffers-kill-terminal)
+
+(defun goto-center-line ()
+  (interactive)
+  (evil-goto-line (tol-scroll/center-line)))
 
 (general-define-key
  :states '(normal visual)
  "w"   'evil-forward-word-end
  "W"   'evil-forward-WORD-end
  "e"   'evil-exchange
- "E"   'evil-exchange-cancel)
+ "E"   'evil-exchange-cancel
+ "k"   'tol-scroll-previous-line
+ "K"   'evil-scroll-line-down
+ "L"   'evil-previous-line
+ "j"   'tol-scroll-next-line
+ "J"   'evil-scroll-line-up
+ "H"   'evil-next-line
+ "C-j" 'evil-join
+ "C-k" 'electric-newline-and-maybe-indent
+ (general-chord "jk") 'goto-center-line
+ (general-chord "kj") 'goto-center-line)
+
+(defhydra jtm/hydra-ivy (:hint nil) ""
+  ("h"        ivy-beginning-of-buffer)
+  ("j"        ivy-next-line)
+  ("k"        ivy-previous-line)
+  ("l"        ivy-end-of-buffer)
+  ("i"        nil)
+  ("RET"      ivy-done :exit t)
+  ("<escape>" keyboard-escape-quit :exit t))
+
+(general-define-key
+ :keymaps 'ivy-minibuffer-map
+ "RET" 'jtm/hydra-ivy/body)
 
 (general-define-key
  :states 'normal
  "C-;" 'evilnc-comment-or-uncomment-lines)
 
 (general-define-key
- :states 'visual
+ :states '(normal visual)
  ";"   'evilnc-comment-or-uncomment-lines)
 
 (general-define-key
