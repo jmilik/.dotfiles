@@ -281,24 +281,32 @@
  :states '(normal visual)
  "w"   'evil-forward-word-end
  "W"   'evil-forward-WORD-end
- "e"   'evil-exchange
- "E"   'evil-exchange-cancel
- "k"   'tol-scroll-previous-line
- "K"   'evil-scroll-line-down
- "L"   'evil-previous-line
- "j"   'tol-scroll-next-line
- "J"   'evil-scroll-line-up
- "H"   'evil-next-line
- "C-j" 'evil-join
- "C-k" 'electric-newline-and-maybe-indent
- (general-chord "jk") 'goto-center-line
- (general-chord "kj") 'goto-center-line)
+ "l"   'evil-exchange
+ "L"   'evil-exchange-cancel
+ "e"   'tol-scroll-previous-line
+ "E"   'evil-scroll-line-down
+ "o"   'evil-forward-char
+ "O"   'evil-previous-line
+ "n"   'tol-scroll-next-line
+ "N"   'evil-scroll-line-up
+ "y"   'evil-backward-char
+ "Y"   'evil-next-line
+ "j"   'evil-yank
+ "J"   'evil-yank-line
+ "k"   'evil-search-next
+ "K"   'evil-search-previous
+ "h"   'evil-open-below
+ "H"   'evil-open-above
+ "C-n" 'evil-join
+ "C-e" 'electric-newline-and-maybe-indent
+ (general-chord "ne") 'goto-center-line
+ (general-chord "en") 'goto-center-line)
 
-(defhydra jtm/hydra-ivy (:hint nil) ""
-  ("h"        ivy-beginning-of-buffer)
-  ("j"        ivy-next-line)
-  ("k"        ivy-previous-line)
-  ("l"        ivy-end-of-buffer)
+(defhydra jtm/hydra-ivy (:hint nil) "===JTM-HYDRA==="
+  ("y"        ivy-beginning-of-buffer)
+  ("n"        ivy-next-line)
+  ("e"        ivy-previous-line)
+  ("o"        ivy-end-of-buffer)
   ("i"        nil)
   ("RET"      ivy-done :exit t)
   ("<escape>" keyboard-escape-quit :exit t))
@@ -318,3 +326,34 @@
 (general-define-key
  :keymaps 'dired-mode-map
  "<backspace>" 'dired-jump)
+
+(setq opam-share (substring (shell-command-to-string "opam config var share 2> /dev/null") 0 -1))
+(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
+
+(use-package tuareg
+  :load-path opam-share
+  :mode ("\\.ml[ily]?$" . tuareg-mode)
+  :config
+  (dolist (var (car (read-from-string (shell-command-to-string "opam config env --sexp")))) (setenv (car var) (cadr var)))
+  (setq exec-path (split-string (getenv "PATH") path-separator)))
+
+(use-package ocp-indent
+  :load-path opam-share)
+
+(use-package ocp-index
+  :load-path opam-share)
+
+(use-package merlin
+  :after tuareg
+  :load-path opam-share
+  :hook (tuareg-mode . merlin-mode)
+  :config
+  (setq merlin-command 'opam
+        merlin-use-auto-complete-mode 'easy))
+
+(use-package utop
+  :after tuareg
+  :load-path opam-share
+  :hook (tuareg-mode . utop-minor-mode)
+  :config
+  (setq utop-command "utop -emacs"))
