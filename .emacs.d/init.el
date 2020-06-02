@@ -271,7 +271,11 @@
 (general-define-key
  :states '(normal visual motion emacs)
  :keymaps 'override
- "Q"   'save-buffers-kill-terminal)
+ "Q"   'save-buffers-kill-terminal
+ "t"   'evil-visual-char
+ "T"   'evil-visual-line
+ "s"   'evil-find-char-to
+ "S"   'evil-find-char-to-backward)
 
 (defun goto-center-line ()
   (interactive)
@@ -285,25 +289,25 @@
  "L"   'evil-exchange-cancel
  "e"   'tol-scroll-previous-line
  "E"   'evil-scroll-line-down
- "o"   'evil-forward-char
- "O"   'evil-previous-line
+ "i"   'evil-forward-char
+ "I"   'evil-previous-line
  "n"   'tol-scroll-next-line
  "N"   'evil-scroll-line-up
- "y"   'evil-backward-char
- "Y"   'evil-next-line
+ "k"   'evil-backward-char
+ "K"   'evil-next-line
  "j"   'evil-yank
  "J"   'evil-yank-line
- "k"   'evil-search-next
- "K"   'evil-search-previous
- "h"   'evil-open-below
- "H"   'evil-open-above
+ "j"   'evil-search-next
+ "J"   'evil-search-previous
+ "h"   'evil-insert
+ "H"   'evil-insert-line
  "C-n" 'evil-join
  "C-e" 'electric-newline-and-maybe-indent
  (general-chord "ne") 'goto-center-line
  (general-chord "en") 'goto-center-line)
 
 (defhydra jtm/hydra-ivy (:hint nil) "===JTM-HYDRA==="
-  ("y"        ivy-beginning-of-buffer)
+  ("k"        ivy-beginning-of-buffer)
   ("n"        ivy-next-line)
   ("e"        ivy-previous-line)
   ("o"        ivy-end-of-buffer)
