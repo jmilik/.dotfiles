@@ -6,7 +6,7 @@
 # [[ $- != *i* ]] && return
 
 alias ls='ls --color=auto'
-PS1='\033[33m[\u@\h \W]\$\033[39;49m '
+PS1='\033[33m[\u@\h \W]\$\033[0m '
 
 shopt -s expand_aliases
 
