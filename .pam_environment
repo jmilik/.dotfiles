@@ -1,4 +1,6 @@
 EDITOR='emacsclient -nc'
 VISUAL='emacsclient -nc'
 PAGER='less'
-BROWSER='chromium'
+BROWSER='firefox'
+VDPAU_DRIVER="nvidia"
+

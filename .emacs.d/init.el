@@ -28,10 +28,11 @@
       initial-scratch-message ""
       ring-bell-function 'ignore)
 
-(scroll-bar-mode -1)
-(tool-bar-mode   -1)
-(tooltip-mode    -1)
-(menu-bar-mode   -1)
+(scroll-bar-mode  -1)
+(tool-bar-mode    -1)
+(tooltip-mode     -1)
+(menu-bar-mode    -1)
+(blink-cursor-mode 0)
 
 (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -47,9 +48,9 @@
                     :family "Adobe Source Code Pro"
                     :height 90
                     :weight 'normal
-                    :width 'normal)
+                    :width  'normal)
 
-(setq shell-file-name "bash-for-emacs.sh"
+(setq shell-file-name "~/.emacs.d/bash-for-emacs.sh"
       shell-command-switch "-c")
 
 (require 'package)
@@ -115,9 +116,21 @@
         ivy-use-virtual-buffers t
         enable-recursive-minibuffers t))
 
+(use-package ivy
+  :config
+  (define-key ivy-minibuffer-map [remap previous-line] nil)
+  (define-key ivy-minibuffer-map [remap next-line]     nil)
+  (define-key ivy-minibuffer-map (kbd "<up>")          nil)
+  (define-key ivy-minibuffer-map (kbd "<down>")        nil))
+
 (use-package ivy-rich
   :after ivy
   :config
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+  (ivy-rich-modify-columns
+    'counsel-M-x
+    '((counsel-M-x-transformer (:width 40))
+      (ivy-rich-counsel-function-docstring (:width 80))))
   (ivy-rich-mode t))
 
 (defun swiper-recenter (&rest args)
@@ -131,8 +144,9 @@
   :config
   (setq ivy-posframe-min-width 125
         ivy-posframe-width 125
+	ivy-posframe-min-height 2
         ivy-posframe-border-width 2
-        ivy-posframe-parameters '((left-fringe . 8) (right-fringe . 8))
+        ivy-posframe-parameters '((left-fringe . 5) (right-fringe . 5))
         ivy-posframe-display-functions-alist
         '((ivy-switch-buffer                 . ivy-posframe-display-at-frame-center)
           (counsel-M-x                       . ivy-posframe-display-at-frame-center)
@@ -144,9 +158,12 @@
           (counsel-projectile-switch-project . ivy-posframe-display-at-frame-center)
           (dumb-jump-go                      . ivy-posframe-display-at-frame-center)
           (t                                 . nil)))
-  (ivy-posframe-enable))
+  (set-face-attribute 'ivy-current-match nil :underline nil :weight 'normal :foreground 'unspecified)
+  (ivy-posframe-mode t))
 
-(use-package hydra)
+(use-package hydra
+  :config
+  (setq hydra-is-helpful nil))
 
 (use-package dumb-jump
   :after ivy
@@ -306,22 +323,38 @@
  (general-chord "ne") 'goto-center-line
  (general-chord "en") 'goto-center-line)
 
-(defhydra jtm/hydra-ivy (:hint nil) "===JTM-HYDRA==="
-  ("k"        ivy-beginning-of-buffer)
-  ("n"        ivy-next-line)
-  ("e"        ivy-previous-line)
-  ("o"        ivy-end-of-buffer)
-  ("i"        nil)
-  ("RET"      ivy-done :exit t)
-  ("<escape>" keyboard-escape-quit :exit t))
+(defhydra jtm/hydra-ivy
+  (:hint
+    nil
+   :body-pre
+   (progn
+     (set-face-attribute 'ivy-current-match nil :weight 'bold)
+     (set-face-attribute 'ivy-posframe-cursor nil
+      :foreground (face-attribute 'ivy-posframe :background nil 'default)
+      :background (face-attribute 'ivy-posframe :background nil 'default)))
+   :post 
+   (progn
+     (set-face-attribute 'ivy-current-match nil :weight 'normal)
+     (set-face-attribute 'ivy-posframe-cursor nil
+      :foreground (face-attribute 'ivy-posframe :foreground nil 'default)
+      :background (face-attribute 'ivy-posframe :foreground nil 'default)))
+   :color
+    amaranth)
+   ("k"        ivy-beginning-of-buffer)
+   ("<left>"   ivy-beginning-of-buffer)
+   ("n"        ivy-next-line)
+   ("<down>"   ivy-next-line)
+   ("e"        ivy-previous-line)
+   ("<up>"     ivy-previous-line)
+   ("o"        ivy-end-of-buffer)
+   ("<right>"  ivy-end-of-buffer)
+   ("i"        nil)
+   ("RET"      ivy-done :exit t)
+   ("<escape>" keyboard-escape-quit :exit t))
 
 (general-define-key
  :keymaps 'ivy-minibuffer-map
  "RET" 'jtm/hydra-ivy/body)
-
-(general-define-key
- :states 'normal
- "C-;" 'evilnc-comment-or-uncomment-lines)
 
 (general-define-key
  :states '(normal visual)

@@ -6,10 +6,8 @@
 # [[ $- != *i* ]] && return
 
 alias ls='ls --color=auto'
-PS1='[\u@\h \W]\$ '
+PS1='\033[33m[\u@\h \W]\$\033[39;49m '
 
 shopt -s expand_aliases
 
-alias su='su -l'
 alias e='emacsclient -nc'
-alias dotfiles='/usr/bin/git --git-dir=/home/joseph/.dotfiles/ --work-tree=/home/joseph'
