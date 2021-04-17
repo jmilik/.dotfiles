@@ -2,5 +2,5 @@ EDITOR='emacsclient -nc'
 VISUAL='emacsclient -nc'
 PAGER='less'
 BROWSER='firefox'
-VDPAU_DRIVER="nvidia"
-
+VDPAU_DRIVER='nvidia'
+JMILIK_KEYBOARD_LAYOUT='qwerty'

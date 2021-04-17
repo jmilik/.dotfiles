@@ -2,8 +2,8 @@
 
 (setq-default tol-scroll-region-max-lines 9
               tol-scroll-region-max-percent 0.3
-              tol-scroll-end-buffer-max-lines 5
-              tol-scroll-end-buffer-max-percent 0.15)
+              tol-scroll-end-buffer-max-lines 9
+              tol-scroll-end-buffer-max-percent 0.3)
 
 (defun tol-scroll/first-line-in-window ()
   (line-number-at-pos (window-start)))
@@ -18,7 +18,9 @@
   (/ (window-height) 2))
 
 (defun tol-scroll/center-line ()
-  (+ (tol-scroll/first-line-in-window) (tol-scroll/number-lines-in-half-window)))
+  (if (tol-scroll/window-larger-than-file)
+    (+ (tol-scroll/first-line-in-window) (tol-scroll/number-lines-in-half-window))
+    (/ (count-screen-lines) 2)))
 
 (defun tol-scroll/tol-size-by-max-percent (percent)
   (floor (* percent (tol-scroll/number-lines-in-half-window))))
@@ -44,10 +46,15 @@
    (not (tol-scroll/cursor-in-tol-region count))))
 
 (defun tol-scroll/tol-end-buffer-size ()
-  (min tol-scroll-end-buffer-max-lines
-       (tol-scroll/tol-size-by-max-percent tol-scroll-end-buffer-max-percent)))
+  (max
+    (min tol-scroll-end-buffer-max-lines
+         (tol-scroll/tol-size-by-max-percent tol-scroll-end-buffer-max-percent))
+    2)) ; values less than 2 result in no post-buffer line being shown at all
 
-(defun tol-scroll/cursor-outside-tol-of-buffer-end ()
+(defun tol-scroll/not-at-top-of-buffer ()
+  (> (tol-scroll/first-line-in-window) 1))
+
+(defun tol-scroll/not-at-bottom-of-buffer ()
   (< (tol-scroll/last-line-in-window)
      (+ (count-screen-lines) (tol-scroll/tol-end-buffer-size))))
 
@@ -58,7 +65,8 @@ If movement would take cursor outside tolerance region, scroll buffer too."
   (interactive "p")
   (if (and (bound-and-true-p tol-scroll-mode)
            (tol-scroll/movement-crosses-tol-region-boundary (- (or count 1)))
-           (tol-scroll/window-larger-than-file))
+           (tol-scroll/window-larger-than-file)
+           (tol-scroll/not-at-top-of-buffer))
       (progn
         (evil-scroll-line-up (or count 1))
         (evil-previous-line (or count 1)))
@@ -72,7 +80,7 @@ If movement would take cursor outside tolerance region, scroll buffer too."
   (if (and (bound-and-true-p tol-scroll-mode)
            (tol-scroll/movement-crosses-tol-region-boundary (or count 1))
            (tol-scroll/window-larger-than-file)
-           (tol-scroll/cursor-outside-tol-of-buffer-end))
+           (tol-scroll/not-at-bottom-of-buffer))
       (progn
         (evil-scroll-line-down (or count 1))
         (evil-next-line (or count 1)))

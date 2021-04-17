@@ -1,3 +1,5 @@
+(defun jomak () (equal (getenv "JMILIK_KEYBOARD_LAYOUT") "jomak"))
+
 (setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
       version-control t
       delete-old-versions t
@@ -142,10 +144,10 @@
   :after ivy
   :diminish
   :config
-  (setq ivy-posframe-min-width 125
-        ivy-posframe-width 125
-	ivy-posframe-min-height 2
-        ivy-posframe-border-width 2
+  (setq ivy-posframe-min-width    125
+        ivy-posframe-width        125
+	ivy-posframe-min-height     2
+        ivy-posframe-border-width   2
         ivy-posframe-parameters '((left-fringe . 5) (right-fringe . 5))
         ivy-posframe-display-functions-alist
         '((ivy-switch-buffer                 . ivy-posframe-display-at-frame-center)
@@ -223,7 +225,7 @@
   :after key-chord)
 
 (use-package tol-scroll
-  :load-path "~/.emacs.d/jtm/tol-scroll"
+  :load-path "~/.emacs.d/jmilik/tol-scroll"
   :diminish
   :config
   (tol-scroll-mode))
@@ -288,73 +290,15 @@
 (general-define-key
  :states '(normal visual motion emacs)
  :keymaps 'override
- "Q"   'save-buffers-kill-terminal
- "t"   'evil-visual-char
- "T"   'evil-visual-line
- "s"   'evil-find-char-to
- "S"   'evil-find-char-to-backward)
+ "Q"   'save-buffers-kill-terminal)
 
 (defun goto-center-line ()
   (interactive)
   (evil-goto-line (tol-scroll/center-line)))
 
 (general-define-key
- :states '(normal visual)
- "w"   'evil-forward-word-end
- "W"   'evil-forward-WORD-end
- "l"   'evil-exchange
- "L"   'evil-exchange-cancel
- "e"   'tol-scroll-previous-line
- "E"   'evil-scroll-line-down
- "i"   'evil-forward-char
- "I"   'evil-previous-line
- "n"   'tol-scroll-next-line
- "N"   'evil-scroll-line-up
- "k"   'evil-backward-char
- "K"   'evil-next-line
- "j"   'evil-yank
- "J"   'evil-yank-line
- "j"   'evil-search-next
- "J"   'evil-search-previous
- "h"   'evil-insert
- "H"   'evil-insert-line
- "C-n" 'evil-join
- "C-e" 'electric-newline-and-maybe-indent
- (general-chord "ne") 'goto-center-line
- (general-chord "en") 'goto-center-line)
-
-(defhydra jtm/hydra-ivy
-  (:hint
-    nil
-   :body-pre
-   (progn
-     (set-face-attribute 'ivy-current-match nil :weight 'bold)
-     (set-face-attribute 'ivy-posframe-cursor nil
-      :foreground (face-attribute 'ivy-posframe :background nil 'default)
-      :background (face-attribute 'ivy-posframe :background nil 'default)))
-   :post 
-   (progn
-     (set-face-attribute 'ivy-current-match nil :weight 'normal)
-     (set-face-attribute 'ivy-posframe-cursor nil
-      :foreground (face-attribute 'ivy-posframe :foreground nil 'default)
-      :background (face-attribute 'ivy-posframe :foreground nil 'default)))
-   :color
-    amaranth)
-   ("k"        ivy-beginning-of-buffer)
-   ("<left>"   ivy-beginning-of-buffer)
-   ("n"        ivy-next-line)
-   ("<down>"   ivy-next-line)
-   ("e"        ivy-previous-line)
-   ("<up>"     ivy-previous-line)
-   ("o"        ivy-end-of-buffer)
-   ("<right>"  ivy-end-of-buffer)
-   ("i"        nil)
-   ("RET"      ivy-done :exit t)
-   ("<escape>" keyboard-escape-quit :exit t))
-
-(general-define-key
  :keymaps 'ivy-minibuffer-map
- "RET" 'jtm/hydra-ivy/body)
+ "RET" 'jmilik/hydra-ivy/body)
 
 (general-define-key
  :states '(normal visual)
@@ -364,33 +308,6 @@
  :keymaps 'dired-mode-map
  "<backspace>" 'dired-jump)
 
-(setq opam-share (substring (shell-command-to-string "opam config var share 2> /dev/null") 0 -1))
-(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
+(if (jomak) (load "~/.emacs.d/jmilik/jomak.el") (load "~/.emacs.d/jmilik/qwerty.el"))
 
-(use-package tuareg
-  :load-path opam-share
-  :mode ("\\.ml[ily]?$" . tuareg-mode)
-  :config
-  (dolist (var (car (read-from-string (shell-command-to-string "opam config env --sexp")))) (setenv (car var) (cadr var)))
-  (setq exec-path (split-string (getenv "PATH") path-separator)))
-
-(use-package ocp-indent
-  :load-path opam-share)
-
-(use-package ocp-index
-  :load-path opam-share)
-
-(use-package merlin
-  :after tuareg
-  :load-path opam-share
-  :hook (tuareg-mode . merlin-mode)
-  :config
-  (setq merlin-command 'opam
-        merlin-use-auto-complete-mode 'easy))
-
-(use-package utop
-  :after tuareg
-  :load-path opam-share
-  :hook (tuareg-mode . utop-minor-mode)
-  :config
-  (setq utop-command "utop -emacs"))
+(load "~/.emacs.d/jmilik/ocaml.el")

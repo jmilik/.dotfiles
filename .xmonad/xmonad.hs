@@ -13,14 +13,15 @@ main = xmonad $ def
     , clickJustFocuses   = False
     , handleEventHook    = handleEventHook def
     , layoutHook         = layoutHook'
-    } `removeKeysP`
-    [ "M-h"
-    , "M-j"
-    , "M-k"
-    , "M-l"
-    , "M-S-j"
-    , "M-S-k"
-    ] `additionalKeysP`
+    }-- `removeKeysP`
+    --[ "M-h"
+    --, "M-j"
+    --, "M-k"
+    --, "M-l"
+    --, "M-S-j"
+    --, "M-S-k"
+    --]
+      `additionalKeysP`
     [ ("M-d",   spawn "$HOME/.config/rofi/run-custom-launcher.sh")
     , ("M-r",   spawn "rofi -show drun")
     , ("M-j",   sendMessage Shrink)
