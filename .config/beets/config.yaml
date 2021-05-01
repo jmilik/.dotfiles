@@ -1,0 +1,29 @@
+directory: /home/jmilik/music
+library: /home/jmilik/music/library.db
+
+paths:
+  default: %lower{$albumartist/$album%aunique{}/$track $title}
+  singleton: %lower{non-album/$artist/$title}
+  comp: %lower{compilations/$album%aunique{}/$track $title}
+
+original_date: yes
+
+import:
+  move: yes
+
+asciify_paths: yes
+
+replace:
+  '\ ': _
+
+plugins: chroma convert discogs edit embedart fetchart fromfilename info lastgenre scrub web
+
+chroma:
+  auto: yes
+
+convert:
+  auto: yes
+  embed: yes
+
+fetchart:
+  sources: coverart itunes amazon albumart filesystem
