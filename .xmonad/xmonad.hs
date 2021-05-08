@@ -22,7 +22,8 @@ main = xmonad $ def
     --, "M-S-k"
     --]
       `additionalKeysP`
-    [ ("M-d",   spawn "$HOME/.config/rofi/run-custom-launcher.sh")
+    [ ("M-e",   spawn "emacsclient -nc")
+    , ("M-u",   spawn "$HOME/.config/rofi/unmount.sh")
     , ("M-r",   spawn "rofi -show drun")
     , ("M-j",   sendMessage Shrink)
     , ("M-n",   windows W.focusDown)
